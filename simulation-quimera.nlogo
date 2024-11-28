@@ -1,35 +1,48 @@
-patches-own [
-  food
-  nest?
-  nest-scent
-  food-source-number
+globals [
+  random-x
+  random-y
+]
+
+turtles-own [
+  tipo  ; Tipo de formiga (vermelha, laranja, rosa, lilás, amarelo)
+  vida  ; Vida da formiga
+  dano  ; Dano da formiga
 ]
 
 to setup
   ca
-  set-default-shape turtles "bug"
-  create-turtles 100 [
+  set random-x random-xcor
+  set random-y random-ycor
+  criar-formigueiro
+  reset-ticks
+end
+
+to criar-formigueiro
+  create-turtles 1 [
+    set tipo "rainha"
+    set vida 1  ; Vida inicial da rainha
+    set dano 0  ; Dano inicial da rainha
+    set color yellow  ; Cor amarela para a rainha
+    setxy random-x random-y  ; Posiciona aleatoriamente no espaço
+  ]
+  ; Cria formigas vermelhas (soldados)
+  criar-formigas-como-soldados 10
+end
+
+to criar-formigas-como-soldados [quantidade]
+  create-turtles quantidade [
+    set tipo "vermelha"
+    set vida 10
+    set dano 5
     set color red
-  ]
-
-  setup-patches
-
-end
-
-to setup-patches
-  ask patches [
-    setup-nest
+    setxy random-x random-y
   ]
 end
 
-to setup-nest
-  set nest? (distancexy 0 0) < 5 ;patch com 5 unidades sendo o ninho
-  set nest-scent 200 - distancexy 0 0
-end
 
 to go
-  ask turtles [ wiggle fd 1]
-
+  ;criar-formigas-como-soldados 10
+  tick
 end
 
 

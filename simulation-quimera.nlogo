@@ -1,12 +1,15 @@
 globals [
   random-x
   random-y
+  evaporation-rate
+  diffusion-rate
 ]
 
 turtles-own [
   tipo
   vida
   dano
+  comida?
 ]
 
 patches-own [
@@ -14,12 +17,18 @@ patches-own [
   tipo-de-fonte-de-comida
   aldeoes
   quantidade-de-fontes-de-comida
+  chemical
+  ninho?
+  nest-scent
 ]
 
 to setup
   clear-all
   set random-x random-xcor
   set random-y random-ycor
+  set-default-shape turtles "bug"
+  set evaporation-rate 10
+  set diffusion-rate 5
   criar-formigueiro
   destacar-formigueiro
   setup-patches
@@ -31,7 +40,13 @@ to setup-patches
   ask patches [
     criar-comida-padrao
     destacar-patch-de-comida
+    setup-ninho
   ]
+end
+
+to setup-ninho
+  set ninho? (distancexy random-x random-y) < 2
+  set nest-scent 200 - distancexy random-x random-y
 end
 
 ; === AMBIENTE ESTÁTICO ===
@@ -93,7 +108,6 @@ end
 
 
 to criar-aldeia [quantidade]
-
  repeat quantidade [
     let x random-xcor
     let y random-ycor
@@ -101,6 +115,27 @@ to criar-aldeia [quantidade]
     ask patches with [abs (pxcor - x) <= 2 and abs (pycor - y) <= 2] [
       set aldeoes random 20 + 10
       set pcolor white
+      set chemical 100
+    ]
+  ]
+end
+
+to recolor-patch  ; procedimento dos patches
+  ifelse ninho? [
+    set pcolor violet                    ; patches do ninho em violeta
+  ] [
+    ifelse comida > 0 [
+      ; patches com comida são coloridos de acordo com a fonte
+      if tipo-de-fonte-de-comida = 1 [ set pcolor cyan ]
+      if tipo-de-fonte-de-comida = 2 [ set pcolor sky ]
+      if tipo-de-fonte-de-comida = 3 [ set pcolor blue ]
+    ] [
+      ; patches normais variam de cor com base na quantidade de feromônio
+      set pcolor scale-color green chemical 0.1 5
+    ]
+    if aldeoes > 0 [
+      set pcolor white
+      set chemical 100
     ]
   ]
 end
@@ -135,10 +170,62 @@ to-report propriedades-formiga [formiga-cor]
   report [30 10 red]
 end
 
+to procurar-por-comida
+  if comida > 0 [
+    set comida comida - 1
+    set comida? true
+    rt 180
+    stop
+  ]
+  if aldeoes > 0 [
+    set aldeoes aldeoes - 1
+    if chemical > 0 [set chemical chemical - 1]
+    set comida? true
+    rt 180
+    stop
+  ]
+  if (chemical >= 0.05) and (chemical < 2) [
+    uphill-chemical                     ; segue o rastro de feromônio
+  ]
+end
 
-to go
-  ;criar-formigas-como-soldados 10
-  tick
+to retornar-ao-formigueiro
+    ifelse ninho? [
+    ;set color red                      ; deposita a comida e muda a cor para não carregando
+    set comida? false
+    rt 180                              ; vira 180 graus para sair novamente
+  ] [
+    set chemical chemical + 60          ; deposita feromônio no caminho de volta
+    uphill-nest-scent                   ; move-se em direção ao ninho seguindo o gradiente
+  ]
+end
+
+; === MOVIMENTAÇÃO E ORIENTAÇÃO ===
+
+to uphill-chemical  ; procedimento das formigas
+  let scent-ahead chemical-scent-at-angle 0
+  let scent-right chemical-scent-at-angle 45
+  let scent-left chemical-scent-at-angle -45
+  if (scent-right > scent-ahead) or (scent-left > scent-ahead) [
+    ifelse scent-right > scent-left [
+      rt 45                              ; vira 45 graus à direita
+    ] [
+      lt 45                              ; vira 45 graus à esquerda
+    ]
+  ]
+end
+
+to uphill-nest-scent  ; procedimento das formigas
+  let scent-ahead nest-scent-at-angle 0
+  let scent-right nest-scent-at-angle 45
+  let scent-left nest-scent-at-angle -45
+  if (scent-right > scent-ahead) or (scent-left > scent-ahead) [
+    ifelse scent-right > scent-left [
+      rt 45                              ; vira 45 graus à direita
+    ] [
+      lt 45                              ; vira 45 graus à esquerda
+    ]
+  ]
 end
 
 
@@ -146,6 +233,45 @@ to wiggle
   rt random 40
   lt random 40
   if not can-move? 1 [ rt 180 ]
+  fd 1
+end
+
+
+; === FUNÇÕES AUXILIARES ===
+
+to-report nest-scent-at-angle [angle]
+  let p patch-right-and-ahead angle 1
+  if p = nobody [ report 0 ]             ; se não houver patch, retorna 0
+  report [nest-scent] of p               ; retorna o valor de 'nest-scent' do patch
+end
+
+to-report chemical-scent-at-angle [angle]
+  let p patch-right-and-ahead angle 1
+  if p = nobody [ report 0 ]             ; se não houver patch, retorna 0
+  report [chemical] of p                 ; retorna o valor de 'chemical' do patch
+end
+
+
+
+; === PROCEDIMENTOS PRINCIPAIS ===
+
+to go
+  ask turtles with [tipo = "vermelho"] [
+    if who >= ticks [ stop ]             ; sincroniza a saída das formigas do ninho com o tempo
+    ifelse comida? = false [
+      procurar-por-comida                ; procura por comida se não estiver carregando
+    ] [
+      retornar-ao-formigueiro            ; retorna ao ninho se estiver carregando comida
+    ]
+    wiggle                               ; movimento aleatório para simular procura
+    fd 1                                 ; move-se para frente
+  ]
+  diffuse chemical (diffusion-rate / 100)  ; difusão do feromônio entre os patches
+  ask patches [
+    set chemical chemical * (100 - evaporation-rate) / 100  ; evaporação do feromônio
+    recolor-patch                     ; atualiza a cor do patch após mudanças
+  ]
+  tick
 end
 @#$#@#$#@
 GRAPHICS-WINDOW

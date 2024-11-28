@@ -25,8 +25,22 @@ to criar-formigueiro
     set color yellow  ; Cor amarela para a rainha
     setxy random-x random-y  ; Posiciona aleatoriamente no espaço
   ]
+  colorir-ninho
   ; Cria formigas vermelhas (soldados)
   criar-formigas-como-soldados 10
+end
+
+to colorir-ninho
+  if random-x > (max-pxcor - 1) [ set random-x (max-pxcor - 1) ]
+  if random-x < (min-pxcor + 1) [ set random-x (min-pxcor + 1) ]
+  if random-y > (max-pycor - 1) [ set random-y (max-pycor - 1) ]
+  if random-y < (min-pycor + 1) [ set random-y (min-pycor + 1) ]
+  ask patches [
+    if (distancexy random-x random-y) < 2
+    [
+    set pcolor violet
+    ]
+  ]
 end
 
 to criar-formigas-como-soldados [quantidade]

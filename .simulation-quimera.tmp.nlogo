@@ -1,12 +1,6 @@
 globals [
   random-x
   random-y
-  num-humanos-mortos
-  num-cacadores-comuns
-  num-cacadores-elite
-  num-cacadores-lendarios
-  num-guardas-reais
-  num-rei
 ]
 
 turtles-own [
@@ -17,14 +11,8 @@ turtles-own [
 
 to setup
   ca
-  set random-x random-xcor
-  set random-y random-ycor
-  set num-humanos-mortos 0
-  set num-cacadores-comuns 0
-  set num-cacadores-elite 0
-  set num-cacadores-lendarios 0
-  set num-guardas-reais 0
-  set num-rei 0
+  set random-x random (max-pxcor - 3 - min-pxcor) + min-pxcor
+  set random-y random (max-pycor -  - min-pycor) + min-pycor
   criar-formigueiro
   reset-ticks
 end
@@ -37,8 +25,18 @@ to criar-formigueiro
     set color yellow  ; Cor amarela para a rainha
     setxy random-x random-y  ; Posiciona aleatoriamente no espaço
   ]
+  colorir-ninho
   ; Cria formigas vermelhas (soldados)
   criar-formigas-como-soldados 10
+end
+
+to colorir-ninho
+  ask patches [
+    if (distancexy random-x random-y) < 2
+    [
+    set pcolor violet
+    ]
+  ]
 end
 
 to criar-formigas-como-soldados [quantidade]
@@ -47,9 +45,8 @@ to criar-formigas-como-soldados [quantidade]
     set vida 10
     set dano 5
     set color red
-
+    setxy random-x random-y
   ]
-  ask turtles [fd 1 ]
 end
 
 

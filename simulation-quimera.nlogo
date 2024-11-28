@@ -4,9 +4,9 @@ globals [
 ]
 
 turtles-own [
-  tipo  ; Tipo de formiga (vermelha, laranja, rosa, lilás, amarelo)
-  vida  ; Vida da formiga
-  dano  ; Dano da formiga
+  tipo
+  vida
+  dano
 ]
 
 patches-own [
@@ -17,11 +17,11 @@ patches-own [
 ]
 
 to setup
-  ca
+  clear-all
   set random-x random-xcor
   set random-y random-ycor
   criar-formigueiro
-  destacar-ninho
+  destacar-formigueiro
   setup-patches
   criar-aldeia 2
   reset-ticks
@@ -34,19 +34,51 @@ to setup-patches
   ]
 end
 
+; === AMBIENTE ESTÁTICO ===
+
+to criar-formigueiro
+  let propriedades (propriedades-formiga "amarelo")
+
+  create-turtles 1 [
+    set tipo "amarelo"
+    set vida item 0 propriedades
+    set dano item 1 propriedades
+    set color item 2 propriedades
+    setxy random-x random-y
+  ]
+
+  ; Cria formigas vermelhas (soldados)
+  criar-formigas-como "vermelho" 10
+end
+
+to destacar-formigueiro
+  if random-x > (max-pxcor - 1) [ set random-x (max-pxcor - 1) ]
+  if random-x < (min-pxcor + 1) [ set random-x (min-pxcor + 1) ]
+  if random-y > (max-pycor - 1) [ set random-y (max-pycor - 1) ]
+  if random-y < (min-pycor + 1) [ set random-y (min-pycor + 1) ]
+  ask patches [
+    if (distancexy random-x random-y) < 2
+    [
+    set pcolor violet
+    ]
+  ]
+end
+
 to criar-comida-padrao
-  set quantidade-de-fontes-de-comida one-of [1 2 3]
+  set quantidade-de-fontes-de-comida one-of [0 1 2]
 
   repeat quantidade-de-fontes-de-comida [
-    let float random-float 2
-    let new-x random-x * float
-    let new-y random-y * float
+    let float random-float 10 + 1
+    let new-x random-xcor * float
+    let new-y random-ycor * float
 
-    if (distancexy (new-x * float) (new-y * float)) < 3 [
+    if (distancexy (new-x * float) (new-y * float)) < (distancexy random-x random-y)
+    [
     set tipo-de-fonte-de-comida one-of [1 2 3]
     ]
-    if tipo-de-fonte-de-comida > 0 [
-      set comida one-of [1 2]
+    if tipo-de-fonte-de-comida > 0
+    [
+      set comida one-of [10 20]
     ]
   ]
 end
@@ -59,33 +91,21 @@ to destacar-patch-de-comida
   ]
 end
 
-to criar-formigueiro
-  let propriedades (propriedades-formiga "amarelo")
 
-  create-turtles 1 [
-    set tipo "amarelo"
-    set vida item 0 propriedades
-    set dano item 1 propriedades
-    set color item 2 propriedades
-    setxy random-x random-y  ; Posiciona aleatoriamente no espaço
-  ]
+to criar-aldeia [quantidade]
 
-  ; Cria formigas vermelhas (soldados)
-  criar-formigas-como "vermelho" 10
-end
+ repeat quantidade [
+    let x random-xcor
+    let y random-ycor
 
-to destacar-ninho
-  if random-x > (max-pxcor - 1) [ set random-x (max-pxcor - 1) ]
-  if random-x < (min-pxcor + 1) [ set random-x (min-pxcor + 1) ]
-  if random-y > (max-pycor - 1) [ set random-y (max-pycor - 1) ]
-  if random-y < (min-pycor + 1) [ set random-y (min-pycor + 1) ]
-  ask patches [
-    if (distancexy random-x random-y) < 2
-    [
-    set pcolor violet
+    ask patches with [abs (pxcor - x) <= 2 and abs (pycor - y) <= 2] [
+      set aldeoes random 20 + 10
+      set pcolor white
     ]
   ]
 end
+
+; === AÇÕES FORMIGAS ===
 
 to criar-formigas-como [formiga-cor quantidade]
   let propriedades (propriedades-formiga formiga-cor)
@@ -115,18 +135,6 @@ to-report propriedades-formiga [formiga-cor]
   report [30 10 red]
 end
 
-
-to criar-aldeia [quantidade]
-
- repeat quantidade [
-    let x random-xcor
-    let y random-ycor
-    ask patches with [abs (pxcor - x) <= 2 and abs (pycor - y) <= 2] [
-      set aldeoes random 20 + 10
-      set pcolor white  ; Cor branca para representar comida
-    ]
-  ]
-end
 
 to go
   ;criar-formigas-como-soldados 10

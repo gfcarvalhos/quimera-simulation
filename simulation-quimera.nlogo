@@ -3,6 +3,8 @@ globals [
   random-y
   evaporation-rate
   diffusion-rate
+  num-comida-armazenada
+  num-humanos-mortos
 ]
 
 turtles-own [
@@ -29,6 +31,7 @@ to setup
   set-default-shape turtles "bug"
   set evaporation-rate 10
   set diffusion-rate 5
+  set num-comida-armazenada 0
   criar-formigueiro
   destacar-formigueiro
   setup-patches
@@ -193,10 +196,19 @@ to retornar-ao-formigueiro
     ifelse ninho? [
     ;set color red                      ; deposita a comida e muda a cor para não carregando
     set comida? false
+    set num-comida-armazenada num-comida-armazenada + 1
     rt 180                              ; vira 180 graus para sair novamente
   ] [
     set chemical chemical + 60          ; deposita feromônio no caminho de volta
     uphill-nest-scent                   ; move-se em direção ao ninho seguindo o gradiente
+  ]
+end
+
+to gerar-novas-formigas
+  let counter 10
+  if num-comida-armazenada >= counter [
+    criar-formigas-como "vermelho" 1
+    set num-comida-armazenada num-comida-armazenada - counter
   ]
 end
 
@@ -271,6 +283,9 @@ to go
     set chemical chemical * (100 - evaporation-rate) / 100  ; evaporação do feromônio
     recolor-patch                     ; atualiza a cor do patch após mudanças
   ]
+
+  ;ações nivel observador
+  gerar-novas-formigas
   tick
 end
 @#$#@#$#@
@@ -334,6 +349,17 @@ NIL
 NIL
 NIL
 1
+
+MONITOR
+40
+158
+103
+203
+red bugs
+count turtles
+17
+1
+11
 
 @#$#@#$#@
 ## WHAT IS IT?

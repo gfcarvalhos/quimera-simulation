@@ -8,6 +8,7 @@ globals [
 ]
 
 turtles-own [
+  classe
   tipo
   vida
   dano
@@ -32,6 +33,7 @@ to setup
   set evaporation-rate 10
   set diffusion-rate 5
   set num-comida-armazenada 0
+  set num-humanos-mortos 0
   criar-formigueiro
   destacar-formigueiro
   setup-patches
@@ -117,7 +119,7 @@ to criar-aldeia [quantidade]
 
     ask patches with [abs (pxcor - x) <= 2 and abs (pycor - y) <= 2] [
       set aldeoes random 20 + 10
-      set pcolor white
+      set pcolor lime
       set chemical 100
     ]
   ]
@@ -134,10 +136,10 @@ to recolor-patch  ; procedimento dos patches
       if tipo-de-fonte-de-comida = 3 [ set pcolor blue ]
     ] [
       ; patches normais variam de cor com base na quantidade de feromônio
-      set pcolor scale-color green chemical 0.1 5
+      set pcolor scale-color pink chemical 0.1 5
     ]
     if aldeoes > 0 [
-      set pcolor white
+      set pcolor lime
       set chemical 100
     ]
   ]
@@ -149,28 +151,29 @@ to criar-formigas-como [formiga-cor quantidade]
   let propriedades (propriedades-formiga formiga-cor)
 
   create-turtles quantidade [
-    set tipo formiga-cor
-    set vida item 0 propriedades
-    set dano item 1 propriedades
-    set color item 2 propriedades
+    set classe "formiga"
+    set tipo item 0 propriedades
+    set vida item 1 propriedades
+    set dano item 2 propriedades
+    set color item 3 propriedades
     setxy random-x random-y
   ]
 end
 
 to-report propriedades-formiga [formiga-cor]
   if formiga-cor = "laranja" [
-    report [50 15 orange]
+    report ["movel" 50 15 orange]
   ]
   if formiga-cor = "rosa" [
-    report [70 25 magenta]
+    report ["movel" 70 25 magenta]
   ]
   if formiga-cor = "lilás" [
-    report [100 30 violet]
+    report ["movel" 100 30 violet]
   ]
   if formiga-cor = "amarelo" [
-    report [150 40 yellow]
+    report ["imovel" 150 40 yellow]
   ]
-  report [30 10 red]
+  report ["movel" 30 10 red]
 end
 
 to procurar-por-comida
@@ -182,6 +185,7 @@ to procurar-por-comida
   ]
   if aldeoes > 0 [
     set aldeoes aldeoes - 1
+    set num-humanos-mortos num-humanos-mortos + 1
     if chemical > 0 [set chemical chemical - 1]
     set comida? true
     rt 180
@@ -205,10 +209,13 @@ to retornar-ao-formigueiro
 end
 
 to gerar-novas-formigas
-  let counter 10
-  if num-comida-armazenada >= counter [
+  let counter 5
+  if num-comida-armazenada mod counter = 0 [
     criar-formigas-como "vermelho" 1
-    set num-comida-armazenada num-comida-armazenada - counter
+  ]
+  let counter_2 10
+  if num-humanos-mortos mod counter_2 = 0 [
+    criar-formigas-como "rosa" 1
   ]
 end
 
@@ -263,12 +270,31 @@ to-report chemical-scent-at-angle [angle]
   report [chemical] of p                 ; retorna o valor de 'chemical' do patch
 end
 
+; === AÇÕES CAÇADORES ===
+
+to criar-cacadores
+  if num-humanos-mortos mod 20 = 0 [
+    criar-cacadores-comuns 1
+  ]
+end
+
+to criar-cacadores-comuns [quantidade]
+  create-turtles quantidade [
+    set shape "wolf"
+    set size 2
+    set classe "caçador"
+    set tipo "caçador-comum"
+    set vida 1
+    set color blue
+    setxy random-xcor random-ycor
+  ]
+end
 
 
 ; === PROCEDIMENTOS PRINCIPAIS ===
 
 to go
-  ask turtles with [tipo = "vermelho"] [
+  ask turtles with [tipo = "movel"] [
     if who >= ticks [ stop ]             ; sincroniza a saída das formigas do ninho com o tempo
     ifelse comida? = false [
       procurar-por-comida                ; procura por comida se não estiver carregando
@@ -284,8 +310,13 @@ to go
     recolor-patch                     ; atualiza a cor do patch após mudanças
   ]
 
+  ask turtles with [classe = "caçador"] [
+    wiggle
+  ]
+
   ;ações nivel observador
   gerar-novas-formigas
+  criar-cacadores
   tick
 end
 @#$#@#$#@
@@ -351,12 +382,45 @@ NIL
 1
 
 MONITOR
-40
-158
+33
+245
+113
+290
+soldier bugs
+count turtles  with [color = red]
+17
+1
+11
+
+MONITOR
+32
+186
+134
+231
+queen/king bug
+count turtles  with [color = yellow]
+17
+1
+11
+
+MONITOR
+33
+301
+118
+346
+captain bugs
+count turtles  with [color = magenta]
+17
+1
+11
+
+MONITOR
+45
+374
 103
-203
-red bugs
-count turtles
+419
+caçador
+count turtles  with [tipo = \"caçador-comum\"]
 17
 1
 11

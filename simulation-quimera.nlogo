@@ -14,23 +14,26 @@ to setup
   set random-x random-xcor
   set random-y random-ycor
   criar-formigueiro
+  destacar-ninho
   reset-ticks
 end
 
 to criar-formigueiro
+  let propriedades (propriedades-formiga "amarelo")
+
   create-turtles 1 [
-    set tipo "rainha"
-    set vida 1  ; Vida inicial da rainha
-    set dano 0  ; Dano inicial da rainha
-    set color yellow  ; Cor amarela para a rainha
+    set tipo "amarelo"
+    set vida item 0 propriedades
+    set dano item 1 propriedades
+    set color item 2 propriedades
     setxy random-x random-y  ; Posiciona aleatoriamente no espaço
   ]
-  colorir-ninho
+
   ; Cria formigas vermelhas (soldados)
-  criar-formigas-como-soldados 10
+  criar-formigas-como "vermelho" 10
 end
 
-to colorir-ninho
+to destacar-ninho
   if random-x > (max-pxcor - 1) [ set random-x (max-pxcor - 1) ]
   if random-x < (min-pxcor + 1) [ set random-x (min-pxcor + 1) ]
   if random-y > (max-pycor - 1) [ set random-y (max-pycor - 1) ]
@@ -43,16 +46,33 @@ to colorir-ninho
   ]
 end
 
-to criar-formigas-como-soldados [quantidade]
+to criar-formigas-como [formiga-cor quantidade]
+  let propriedades (propriedades-formiga formiga-cor)
+
   create-turtles quantidade [
-    set tipo "vermelha"
-    set vida 10
-    set dano 5
-    set color red
+    set tipo formiga-cor
+    set vida item 0 propriedades
+    set dano item 1 propriedades
+    set color item 2 propriedades
     setxy random-x random-y
   ]
 end
 
+to-report propriedades-formiga [formiga-cor]
+  if formiga-cor = "laranja" [
+    report [50 15 orange]
+  ]
+  if formiga-cor = "rosa" [
+    report [70 25 magenta]
+  ]
+  if formiga-cor = "lilás" [
+    report [100 30 violet]
+  ]
+  if formiga-cor = "amarelo" [
+    report [150 40 yellow]
+  ]
+  report [30 10 red]
+end
 
 to go
   ;criar-formigas-como-soldados 10

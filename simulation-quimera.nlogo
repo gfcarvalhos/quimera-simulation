@@ -9,13 +9,54 @@ turtles-own [
   dano  ; Dano da formiga
 ]
 
+patches-own [
+  comida
+  tipo-de-fonte-de-comida
+  aldeoes
+  quantidade-de-fontes-de-comida
+]
+
 to setup
   ca
   set random-x random-xcor
   set random-y random-ycor
   criar-formigueiro
   destacar-ninho
+  setup-patches
+  criar-aldeia 2
   reset-ticks
+end
+
+to setup-patches
+  ask patches [
+    criar-comida-padrao
+    destacar-patch-de-comida
+  ]
+end
+
+to criar-comida-padrao
+  set quantidade-de-fontes-de-comida one-of [1 2 3]
+
+  repeat quantidade-de-fontes-de-comida [
+    let float random-float 2
+    let new-x random-x * float
+    let new-y random-y * float
+
+    if (distancexy (new-x * float) (new-y * float)) < 3 [
+    set tipo-de-fonte-de-comida one-of [1 2 3]
+    ]
+    if tipo-de-fonte-de-comida > 0 [
+      set comida one-of [1 2]
+    ]
+  ]
+end
+
+to destacar-patch-de-comida
+  if comida > 0 [
+    if tipo-de-fonte-de-comida = 1 [ set pcolor cyan ]
+    if tipo-de-fonte-de-comida = 2 [ set pcolor sky ]
+    if tipo-de-fonte-de-comida = 3 [ set pcolor blue ]
+  ]
 end
 
 to criar-formigueiro
@@ -72,6 +113,19 @@ to-report propriedades-formiga [formiga-cor]
     report [150 40 yellow]
   ]
   report [30 10 red]
+end
+
+
+to criar-aldeia [quantidade]
+
+ repeat quantidade [
+    let x random-xcor
+    let y random-ycor
+    ask patches with [abs (pxcor - x) <= 2 and abs (pycor - y) <= 2] [
+      set aldeoes random 20 + 10
+      set pcolor white  ; Cor branca para representar comida
+    ]
+  ]
 end
 
 to go

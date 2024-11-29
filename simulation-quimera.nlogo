@@ -6,6 +6,10 @@ globals [
   num-comida-armazenada
   num-humanos-mortos
   num-cacadores-comum-mortos
+  num-cacadores-elite-mortos
+  num-guardas-reais
+  rei?
+  num-cacadores-lendarios
 ]
 
 turtles-own [
@@ -39,6 +43,10 @@ to setup
   set num-comida-armazenada 0
   set num-humanos-mortos 0
   set num-cacadores-comum-mortos 0
+  set num-cacadores-elite-mortos 0
+  set num-guardas-reais 0
+  set rei? false
+  set num-cacadores-lendarios 0
   criar-formigueiro
   destacar-formigueiro
   setup-patches
@@ -180,19 +188,19 @@ to criar-formigas-como [formiga-cor quantidade]
 end
 
 to-report propriedades-formiga [formiga-cor]
-  if formiga-cor = "laranja" [
-    report ["movel" 150 3 orange]
-  ]
+;  if formiga-cor = "laranja" [
+;    report ["movel" 150 3 orange]
+;  ]
   if formiga-cor = "rosa" [
-    report ["movel" 300 25 magenta]
+    report ["movel" 120 10 magenta]
   ]
-  if formiga-cor = "lilás" [
-    report ["movel" 100 30 violet]
+  if formiga-cor = "lilas" [
+    report ["movel" 80 20 violet]
   ]
   if formiga-cor = "amarelo" [
-    report ["imovel" 1000 40 yellow]
+    report ["imovel" 500 25 yellow]
   ]
-  report ["movel" 100 2 red]
+  report ["movel" 100 5 red]
 end
 
 to procurar-por-comida
@@ -217,9 +225,7 @@ end
 
 to retornar-ao-formigueiro
     ifelse ninho? [
-    ;set color red                      ; deposita a comida e muda a cor para não carregando
     set comida? false
-    ;set vida vida + 50
     set num-comida-armazenada num-comida-armazenada + 1
     rt 180                              ; vira 180 graus para sair novamente
   ] [
@@ -233,9 +239,24 @@ to gerar-novas-formigas
   if num-comida-armazenada mod counter = 0 [
     criar-formigas-como "vermelho" 1
   ]
-  let counter_2 15
+  let counter_2 10
   if num-humanos-mortos mod counter_2 = 1 [
     criar-formigas-como "rosa" 1
+  ]
+
+  if num-cacadores-elite-mortos mod 3 = 1 and num-guardas-reais <= 3 [
+    criar-formigas-como "lilas" 1
+    set num-guardas-reais num-guardas-reais + 1
+  ]
+
+  if num-guardas-reais = 3 and rei? = false [
+    ask turtles with [color = yellow] [die]
+    criar-formigas-como "amarelo" 1
+    set rei? true
+    ask turtles [
+      wait 1
+      show "A rainha está morta! Longa vida ao rei!"
+    ]
   ]
 end
 
@@ -293,12 +314,22 @@ end
 ; === AÇÕES CAÇADORES ===
 
 to criar-cacadores
-  if num-humanos-mortos mod 5 = 1[
+  if num-humanos-mortos mod 10 = 1[
     criar-novo-cacador "cacador-comum" 1
   ]
-  if num-cacadores-comum-mortos mod 15 = 1 [
+  if num-cacadores-comum-mortos mod 10 = 1 [
     criar-novo-cacador "cacador-comum" 1
   ]
+
+  if num-cacadores-comum-mortos mod 10 = 1 [
+    criar-novo-cacador "cacador-elite" 1
+  ]
+
+  if rei? = true and num-cacadores-lendarios <= 4 [
+    criar-novo-cacador "cacador-lendario" 2
+    set num-cacadores-lendarios num-cacadores-lendarios + 2
+  ]
+
 end
 
 to criar-novo-cacador [tipo-cacador quantidade]
@@ -312,7 +343,9 @@ to criar-novo-cacador [tipo-cacador quantidade]
     set dano item 2 propriedades
     set vida item 1 propriedades
     set color item 3 propriedades
+    if (item 4 propriedades) = true [
     set foco one-of patches with [aldeia?]
+    ]
     setxy random-xcor random-ycor
   ]
 end
@@ -353,6 +386,7 @@ to verificar-alvos [classe-agente]
          set vida vida - [dano] of myself
          if vida <= 0 [
             if tipo = "cacador-comum" [set num-cacadores-comum-mortos num-cacadores-comum-mortos + 1]
+            if tipo = "cacador-elite" [set num-cacadores-elite-mortos num-cacadores-elite-mortos + 1]
             print "Um caçador foi eliminado!"
             die
           ]
@@ -364,13 +398,13 @@ to verificar-alvos [classe-agente]
 end
 
 to-report propriedades-cacadores [tipo-cacador]
-  if tipo-cacador = "cacadores-elite" [
-    report ["cacadores-elite" 400 20 magenta]
+  if tipo-cacador = "cacador-elite" [
+    report ["cacador-elite" 250 15 magenta true]
   ]
-  if tipo-cacador = "cacadores-lendario" [
-    report ["cacadores-lendario" 300 100 violet]
+  if tipo-cacador = "cacador-lendario" [
+    report ["cacador-lendario" 350 30 violet false]
   ]
-  report ["cacador-comum" 200 4 blue]
+  report ["cacador-comum" 200 5 blue true]
 end
 
 
@@ -469,10 +503,10 @@ NIL
 1
 
 MONITOR
-33
-245
-113
-290
+36
+208
+116
+253
 soldier bugs
 count turtles  with [color = red]
 17
@@ -480,10 +514,10 @@ count turtles  with [color = red]
 11
 
 MONITOR
-32
-186
-134
-231
+35
+149
+137
+194
 queen/king bug
 count turtles  with [color = yellow]
 17
@@ -491,10 +525,10 @@ count turtles  with [color = yellow]
 11
 
 MONITOR
-33
-301
-118
-346
+36
+264
+121
+309
 captain bugs
 count turtles  with [color = magenta]
 17
@@ -502,12 +536,45 @@ count turtles  with [color = magenta]
 11
 
 MONITOR
-146
-300
-251
-345
+148
+205
+253
+250
 normal hunter
 count turtles  with [tipo = \"cacador-comum\"]
+17
+1
+11
+
+MONITOR
+162
+267
+237
+312
+elite hunter
+count turtles with [tipo = \"cacador-elite\"]
+17
+1
+11
+
+MONITOR
+149
+324
+241
+369
+legend hunter
+count turtles  with [tipo = \"cacador-lendario\"]
+17
+1
+11
+
+MONITOR
+34
+323
+119
+368
+real bugs
+count turtles  with [color = violet]
 17
 1
 11

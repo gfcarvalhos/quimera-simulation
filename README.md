@@ -1,6 +1,6 @@
 # Simulação de Formigueiro Versão HxH: Formiga Quimera
 
-Este repositório contém o código e a documentação para o projeto **Simulação de Formigueiro Versão HxH: Formiga Quimera**, desenvolvido durante a disciplina de **Inteligência Artificial** da **Universidade Federal do Maranhão (UFMA)**. O projeto utiliza o framework **NetLogo** para modelar um ecossistema complexo onde formigas quimeras do universo HxH evoluem, enfrentam desafios e interagem com seu ambiente de maneira inteligente e adaptativa.
+Este repositório contém o código e a documentação para o projeto **Simulação de Formigueiro Versão HxH: Formiga Quimera**, desenvolvido durante a disciplina de **Inteligência Artificial** da **Universidade Federal do Maranhão (UFMA)**. O projeto utiliza o framework **NetLogo** para modelar um ecossistema complexo onde formigas quimeras do universo Hunter x Hunter.
 
 ---
 
@@ -8,7 +8,7 @@ Este repositório contém o código e a documentação para o projeto **Simulaç
 
 ### **O Formigueiro**
 - **Formação Inicial**: O formigueiro surge em um ponto aleatório do mapa, com uma área delimitada.
-- **Rainha Quimera**: Uma rainha mutante que consome qualquer ser vivo para adquirir genes que aumentam a **vida** e o **dano de ataque** de suas proles.
+- **Rainha Quimera**: Uma rainha mutante que consome qualquer ser vivo para adquirir novos genes para prole.
 - **Hierarquia das Formigas**:
   - **Soldados**: Vermelho Carmim (#FF2400) - Dano e vida básico.
   - **Capitães**: Laranja Fogo (#FF6A00) - Dano e vida médios.

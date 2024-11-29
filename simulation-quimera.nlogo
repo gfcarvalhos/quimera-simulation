@@ -5,6 +5,7 @@ globals [
   diffusion-rate
   num-comida-armazenada
   num-humanos-mortos
+  num-cacadores-comum-mortos
 ]
 
 turtles-own [
@@ -27,13 +28,15 @@ patches-own [
 
 to setup
   clear-all
+  print "Bem-vindo à Simulação HxH Quimera."
   set random-x random-xcor
   set random-y random-ycor
   set-default-shape turtles "bug"
-  set evaporation-rate 10
+  set evaporation-rate 20
   set diffusion-rate 5
   set num-comida-armazenada 0
   set num-humanos-mortos 0
+  set num-cacadores-comum-mortos 0
   criar-formigueiro
   destacar-formigueiro
   setup-patches
@@ -60,10 +63,11 @@ to criar-formigueiro
   let propriedades (propriedades-formiga "amarelo")
 
   create-turtles 1 [
-    set tipo "amarelo"
-    set vida item 0 propriedades
-    set dano item 1 propriedades
-    set color item 2 propriedades
+    set classe "formiga"
+    set tipo item 0 propriedades
+    set vida item 1 propriedades
+    set dano item 2 propriedades
+    set color item 3 propriedades
     setxy random-x random-y
   ]
 
@@ -156,24 +160,25 @@ to criar-formigas-como [formiga-cor quantidade]
     set vida item 1 propriedades
     set dano item 2 propriedades
     set color item 3 propriedades
+    set size 1
     setxy random-x random-y
   ]
 end
 
 to-report propriedades-formiga [formiga-cor]
   if formiga-cor = "laranja" [
-    report ["movel" 50 15 orange]
+    report ["movel" 150 3 orange]
   ]
   if formiga-cor = "rosa" [
-    report ["movel" 70 25 magenta]
+    report ["movel" 300 25 magenta]
   ]
   if formiga-cor = "lilás" [
     report ["movel" 100 30 violet]
   ]
   if formiga-cor = "amarelo" [
-    report ["imovel" 150 40 yellow]
+    report ["imovel" 1000 40 yellow]
   ]
-  report ["movel" 30 10 red]
+  report ["movel" 100 2 red]
 end
 
 to procurar-por-comida
@@ -200,6 +205,7 @@ to retornar-ao-formigueiro
     ifelse ninho? [
     ;set color red                      ; deposita a comida e muda a cor para não carregando
     set comida? false
+    ;set vida vida + 50
     set num-comida-armazenada num-comida-armazenada + 1
     rt 180                              ; vira 180 graus para sair novamente
   ] [
@@ -213,8 +219,8 @@ to gerar-novas-formigas
   if num-comida-armazenada mod counter = 0 [
     criar-formigas-como "vermelho" 1
   ]
-  let counter_2 10
-  if num-humanos-mortos mod counter_2 = 0 [
+  let counter_2 15
+  if num-humanos-mortos mod counter_2 = 1 [
     criar-formigas-como "rosa" 1
   ]
 end
@@ -273,29 +279,79 @@ end
 ; === AÇÕES CAÇADORES ===
 
 to criar-cacadores
-  if num-humanos-mortos mod 20 = 0 [
-    criar-cacadores-comuns 1
+  if num-humanos-mortos mod 5 = 1[
+    criar-novo-cacador "cacador-comum" 1
+  ]
+  if num-cacadores-comum-mortos mod 15 = 1 [
+    criar-novo-cacador "cacador-comum" 1
   ]
 end
 
-to criar-cacadores-comuns [quantidade]
+to criar-novo-cacador [tipo-cacador quantidade]
+  let propriedades (propriedades-cacadores tipo-cacador)
+
   create-turtles quantidade [
     set shape "wolf"
-    set size 2
-    set classe "caçador"
-    set tipo "caçador-comum"
-    set vida 1
-    set color blue
+    set size 1
+    set classe "cacador"
+    set tipo item 0 propriedades
+    set dano item 2 propriedades
+    set vida item 1 propriedades
+    set color item 3 propriedades
     setxy random-xcor random-ycor
   ]
+end
+
+to verificar-alvos [classe-agente]
+  ask turtles with [classe = classe-agente] [
+    if classe = "cacador" [
+    let alvo one-of turtles in-radius 1 with [classe = "formiga"]
+    if alvo != nobody [
+      ask alvo [
+         set vida vida - [dano] of myself
+        if vida <= 0 [
+        print "Uma formiga foi eliminada!"
+        die
+          ]
+        ]
+        set vida vida - 20
+      ]
+    ]
+
+    if classe = "formiga" [
+      let alvo one-of turtles in-radius 1 with [classe = "cacador"]
+      if alvo != nobody [
+        ask alvo [
+         set vida vida - [dano] of myself
+         if vida <= 0 [
+            if tipo = "cacador-comum" [set num-cacadores-comum-mortos num-cacadores-comum-mortos + 1]
+            print "Um caçador foi eliminado!"
+            die
+          ]
+        ]
+        set vida vida - 10
+      ]
+    ]
+  ]
+end
+
+to-report propriedades-cacadores [tipo-cacador]
+  if tipo-cacador = "cacadores-elite" [
+    report ["cacadores-elite" 400 20 magenta]
+  ]
+  if tipo-cacador = "cacadores-lendario" [
+    report ["cacadores-lendario" 300 100 violet]
+  ]
+  report ["cacador-comum" 200 4 blue]
 end
 
 
 ; === PROCEDIMENTOS PRINCIPAIS ===
 
 to go
-  ask turtles with [tipo = "movel"] [
+  ask turtles with [classe = "formiga" and tipo = "movel"] [
     if who >= ticks [ stop ]             ; sincroniza a saída das formigas do ninho com o tempo
+    verificar-alvos "formiga"
     ifelse comida? = false [
       procurar-por-comida                ; procura por comida se não estiver carregando
     ] [
@@ -310,8 +366,11 @@ to go
     recolor-patch                     ; atualiza a cor do patch após mudanças
   ]
 
-  ask turtles with [classe = "caçador"] [
+  ask turtles with [classe = "cacador"] [
+    verificar-alvos "cacador"
+
     wiggle
+    fd 1
   ]
 
   ;ações nivel observador
@@ -321,21 +380,21 @@ to go
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-210
-10
-647
-448
+278
+15
+745
+483
 -1
 -1
-13.0
+13.91
 1
 10
 1
 1
 1
 0
-1
-1
+0
+0
 1
 -16
 16
@@ -415,12 +474,12 @@ count turtles  with [color = magenta]
 11
 
 MONITOR
-45
-374
-103
-419
-caçador
-count turtles  with [tipo = \"caçador-comum\"]
+146
+300
+251
+345
+normal hunter
+count turtles  with [tipo = \"cacador-comum\"]
 17
 1
 11

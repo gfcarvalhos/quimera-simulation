@@ -8,6 +8,9 @@ globals [
   num-cacadores-comum-mortos
   num-cacadores-elite-mortos
   num-guardas-reais
+  ultimo-guardas-reais
+  ultimo-humanos-mortos
+  ultimo-cacadores-mortos
   rei?
   num-cacadores-lendarios
 ]
@@ -47,6 +50,8 @@ to setup
   set num-guardas-reais 0
   set rei? false
   set num-cacadores-lendarios 0
+  set ultimo-humanos-mortos 0
+  set ultimo-cacadores-mortos 0
   criar-formigueiro
   destacar-formigueiro
   setup-patches
@@ -187,22 +192,6 @@ to criar-formigas-como [formiga-cor quantidade]
   ]
 end
 
-to-report propriedades-formiga [formiga-cor]
-;  if formiga-cor = "laranja" [
-;    report ["movel" 150 3 orange]
-;  ]
-  if formiga-cor = "rosa" [
-    report ["movel" 120 10 magenta]
-  ]
-  if formiga-cor = "lilas" [
-    report ["movel" 80 20 violet]
-  ]
-  if formiga-cor = "amarelo" [
-    report ["imovel" 500 25 yellow]
-  ]
-  report ["movel" 100 5 red]
-end
-
 to procurar-por-comida
   if comida > 0 [
     set comida comida - 1
@@ -235,29 +224,44 @@ to retornar-ao-formigueiro
 end
 
 to gerar-novas-formigas
-  let counter 5
-  if num-comida-armazenada mod counter = 0 [
+  if num-comida-armazenada mod 5 = 0 and rei? = false [
     criar-formigas-como "vermelho" 1
   ]
-  let counter_2 10
-  if num-humanos-mortos mod counter_2 = 1 [
+  if num-humanos-mortos mod 10 = 0 and rei? = false [
     criar-formigas-como "rosa" 1
   ]
 
-  if num-cacadores-elite-mortos mod 3 = 1 and num-guardas-reais <= 3 [
+  if num-cacadores-elite-mortos mod 5 = 0 and num-guardas-reais < 3 and rei? = false [
     criar-formigas-como "lilas" 1
     set num-guardas-reais num-guardas-reais + 1
+    print "Guarda-real nasceu!"
   ]
 
   if num-guardas-reais = 3 and rei? = false [
-    ask turtles with [color = yellow] [die]
+    ask turtles with [color = yellow] [
+      print "A rainha está morta! Longa vida ao rei!"
+      wait 1
+      die
+    ]
     criar-formigas-como "amarelo" 1
     set rei? true
-    ask turtles [
-      wait 1
-      show "A rainha está morta! Longa vida ao rei!"
-    ]
   ]
+end
+
+to-report propriedades-formiga [formiga-cor]
+;  if formiga-cor = "laranja" [
+;    report ["movel" 150 3 orange]
+;  ]
+  if formiga-cor = "rosa" [
+    report ["movel" 120 10 magenta]
+  ]
+  if formiga-cor = "lilas" [
+    report ["movel" 200 20 violet]
+  ]
+  if formiga-cor = "amarelo" [
+    report ["imovel" 500 25 yellow]
+  ]
+  report ["movel" 100 5 red]
 end
 
 ; === MOVIMENTAÇÃO E ORIENTAÇÃO ===
@@ -314,20 +318,21 @@ end
 ; === AÇÕES CAÇADORES ===
 
 to criar-cacadores
-  if num-humanos-mortos mod 10 = 1[
+  if num-humanos-mortos mod 10 = 0 and num-humanos-mortos > ultimo-humanos-mortos [
     criar-novo-cacador "cacador-comum" 1
-  ]
-  if num-cacadores-comum-mortos mod 10 = 1 [
-    criar-novo-cacador "cacador-comum" 1
+    set ultimo-humanos-mortos num-humanos-mortos
   ]
 
-  if num-cacadores-comum-mortos mod 10 = 1 [
+  if num-cacadores-comum-mortos mod 10 = 0 and num-cacadores-comum-mortos > ultimo-cacadores-mortos [
+    criar-novo-cacador "cacador-comum" 1
     criar-novo-cacador "cacador-elite" 1
+    set ultimo-cacadores-mortos num-cacadores-comum-mortos
   ]
 
   if rei? = true and num-cacadores-lendarios <= 4 [
     criar-novo-cacador "cacador-lendario" 2
     set num-cacadores-lendarios num-cacadores-lendarios + 2
+    print "Caçador lendario nasceu!"
   ]
 
 end
@@ -363,6 +368,18 @@ to mover-cacadores
   ]
 end
 
+to-report propriedades-cacadores [tipo-cacador]
+  if tipo-cacador = "cacador-elite" [
+    report ["cacador-elite" 250 15 orange true]
+  ]
+  if tipo-cacador = "cacador-lendario" [
+    report ["cacador-lendario" 350 30 pink true]
+  ]
+  report ["cacador-comum" 200 3 blue true]
+end
+
+; === DINÂMICA PARA INTERAÇÃO ===
+
 to verificar-alvos [classe-agente]
   ask turtles with [classe = classe-agente] [
     if classe = "cacador" [
@@ -371,8 +388,13 @@ to verificar-alvos [classe-agente]
       ask alvo [
          set vida vida - [dano] of myself
         if vida <= 0 [
-        print "Uma formiga foi eliminada!"
-        die
+            if color = yellow and rei? = true [
+              print "O rei foi morto!"
+              set rei? false
+              stop
+            ]
+            ;print "Uma formiga foi eliminada!"
+            die
           ]
         ]
         set vida vida - 20
@@ -387,7 +409,7 @@ to verificar-alvos [classe-agente]
          if vida <= 0 [
             if tipo = "cacador-comum" [set num-cacadores-comum-mortos num-cacadores-comum-mortos + 1]
             if tipo = "cacador-elite" [set num-cacadores-elite-mortos num-cacadores-elite-mortos + 1]
-            print "Um caçador foi eliminado!"
+            ;print "Um caçador foi eliminado!"
             die
           ]
         ]
@@ -396,17 +418,6 @@ to verificar-alvos [classe-agente]
     ]
   ]
 end
-
-to-report propriedades-cacadores [tipo-cacador]
-  if tipo-cacador = "cacador-elite" [
-    report ["cacador-elite" 250 15 magenta true]
-  ]
-  if tipo-cacador = "cacador-lendario" [
-    report ["cacador-lendario" 350 30 violet false]
-  ]
-  report ["cacador-comum" 200 5 blue true]
-end
-
 
 ; === PROCEDIMENTOS PRINCIPAIS ===
 
@@ -427,7 +438,9 @@ to go
     set chemical chemical * (100 - evaporation-rate) / 100  ; evaporação do feromônio
     recolor-patch                     ; atualiza a cor do patch após mudanças
   ]
-
+  if rei? = true [
+    ask turtles with [ color = yellow ] [ wiggle ]
+  ]
   ask turtles with [classe = "cacador"] [
     verificar-alvos "cacador"
 
@@ -925,6 +938,13 @@ NetLogo 6.3.0
 @#$#@#$#@
 @#$#@#$#@
 @#$#@#$#@
+<experiments>
+  <experiment name="experiment" repetitions="1" runMetricsEveryStep="true">
+    <setup>setup</setup>
+    <go>go</go>
+    <metric>count turtles</metric>
+  </experiment>
+</experiments>
 @#$#@#$#@
 @#$#@#$#@
 default

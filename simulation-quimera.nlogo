@@ -14,6 +14,7 @@ turtles-own [
   vida
   dano
   comida?
+  foco
 ]
 
 patches-own [
@@ -24,6 +25,7 @@ patches-own [
   chemical
   ninho?
   nest-scent
+  aldeia?
 ]
 
 to setup
@@ -46,10 +48,12 @@ end
 
 to setup-patches
   ask patches [
+    set aldeia? false
     criar-comida-padrao
     destacar-patch-de-comida
     setup-ninho
   ]
+  ask patches with [aldeia?] [sprout 1 [set shape "house" set color white]]
 end
 
 to setup-ninho
@@ -125,6 +129,15 @@ to criar-aldeia [quantidade]
       set aldeoes random 20 + 10
       set pcolor lime
       set chemical 100
+      set aldeia? true
+    ]
+  ]
+
+ ask patches with [aldeia?] [
+    sprout 1 [
+      set shape "house"
+      set color gray
+      set size 1
     ]
   ]
 end
@@ -146,6 +159,7 @@ to recolor-patch  ; procedimento dos patches
       set pcolor lime
       set chemical 100
     ]
+
   ]
 end
 
@@ -298,7 +312,21 @@ to criar-novo-cacador [tipo-cacador quantidade]
     set dano item 2 propriedades
     set vida item 1 propriedades
     set color item 3 propriedades
+    set foco one-of patches with [aldeia?]
     setxy random-xcor random-ycor
+  ]
+end
+
+to mover-cacadores
+  ask turtles with [classe = "cacador"] [
+    ifelse distance foco > 5 [
+      face foco
+      fd 1
+    ] [
+      right random 30  ; Movimento aleatório ao redor da aldeia
+      left random 30
+      fd 1
+    ]
   ]
 end
 
@@ -369,7 +397,7 @@ to go
   ask turtles with [classe = "cacador"] [
     verificar-alvos "cacador"
 
-    wiggle
+    mover-cacadores
     fd 1
   ]
 

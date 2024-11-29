@@ -224,15 +224,15 @@ to retornar-ao-formigueiro
 end
 
 to gerar-novas-formigas
-  if num-comida-armazenada mod 5 = 0 and rei? = false [
+  if num-comida-armazenada > 0 and num-comida-armazenada mod 5 = 0 and rei? = false [
     criar-formigas-como "vermelho" 1
   ]
-  if num-humanos-mortos mod 10 = 0 and rei? = false [
+  if num-humanos-mortos > 0 and num-humanos-mortos mod 10 = 0 and rei? = false [
     criar-formigas-como "rosa" 1
   ]
 
-  if num-cacadores-elite-mortos mod 5 = 0 and num-guardas-reais < 3 and rei? = false [
-    criar-formigas-como "lilas" 1
+  if num-cacadores-elite-mortos > 0 and num-cacadores-elite-mortos mod 5 = 0 and num-guardas-reais < 3 and rei? = false [
+    criar-formigas-como "laranja" 1
     set num-guardas-reais num-guardas-reais + 1
     print "Guarda-real nasceu!"
   ]
@@ -249,14 +249,14 @@ to gerar-novas-formigas
 end
 
 to-report propriedades-formiga [formiga-cor]
-;  if formiga-cor = "laranja" [
-;    report ["movel" 150 3 orange]
+;  if formiga-cor = "lilas" [
+;    report ["movel" 150 3 violet]
 ;  ]
   if formiga-cor = "rosa" [
     report ["movel" 120 10 magenta]
   ]
-  if formiga-cor = "lilas" [
-    report ["movel" 200 20 violet]
+  if formiga-cor = "laranja" [
+    report ["movel" 200 20 orange]
   ]
   if formiga-cor = "amarelo" [
     report ["imovel" 500 25 yellow]
@@ -318,12 +318,12 @@ end
 ; === AÇÕES CAÇADORES ===
 
 to criar-cacadores
-  if num-humanos-mortos mod 10 = 0 and num-humanos-mortos > ultimo-humanos-mortos [
+  if num-humanos-mortos > 0 and num-humanos-mortos mod 5 = 0 and num-humanos-mortos > ultimo-humanos-mortos [
     criar-novo-cacador "cacador-comum" 1
     set ultimo-humanos-mortos num-humanos-mortos
   ]
 
-  if num-cacadores-comum-mortos mod 10 = 0 and num-cacadores-comum-mortos > ultimo-cacadores-mortos [
+  if num-cacadores-comum-mortos > 0 and num-cacadores-comum-mortos mod 5 = 0 and num-cacadores-comum-mortos > ultimo-cacadores-mortos [
     criar-novo-cacador "cacador-comum" 1
     criar-novo-cacador "cacador-elite" 1
     set ultimo-cacadores-mortos num-cacadores-comum-mortos
@@ -359,10 +359,12 @@ to mover-cacadores
   ask turtles with [classe = "cacador"] [
     ifelse distance foco > 5 [
       face foco
+      if not can-move? 1 [ rt 180 ]
       fd 1
     ] [
       right random 30  ; Movimento aleatório ao redor da aldeia
       left random 30
+      if not can-move? 1 [ rt 180 ]
       fd 1
     ]
   ]
@@ -370,7 +372,7 @@ end
 
 to-report propriedades-cacadores [tipo-cacador]
   if tipo-cacador = "cacador-elite" [
-    report ["cacador-elite" 250 15 orange true]
+    report ["cacador-elite" 300 15 orange true]
   ]
   if tipo-cacador = "cacador-lendario" [
     report ["cacador-lendario" 350 30 pink true]
@@ -409,7 +411,7 @@ to verificar-alvos [classe-agente]
          if vida <= 0 [
             if tipo = "cacador-comum" [set num-cacadores-comum-mortos num-cacadores-comum-mortos + 1]
             if tipo = "cacador-elite" [set num-cacadores-elite-mortos num-cacadores-elite-mortos + 1]
-            ;print "Um caçador foi eliminado!"
+           ; print "Um caçador foi eliminado!"
             die
           ]
         ]

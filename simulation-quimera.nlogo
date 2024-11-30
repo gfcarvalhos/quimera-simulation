@@ -13,6 +13,8 @@ globals [
   ultimo-cacadores-mortos
   rei?
   num-cacadores-lendarios
+  cod-rei
+  cod-rainha
 ]
 
 turtles-own [
@@ -79,7 +81,7 @@ end
 to criar-formigueiro
   let propriedades (propriedades-formiga "amarelo")
 
-  create-turtles 1 [
+    create-turtles 1 [
     set classe "formiga"
     set tipo item 0 propriedades
     set vida item 1 propriedades
@@ -87,6 +89,8 @@ to criar-formigueiro
     set color item 3 propriedades
     setxy random-x random-y
   ]
+
+  set cod-rainha one-of turtles with [color = yellow]
 
   ; Cria formigas vermelhas (soldados)
   criar-formigas-como "vermelho" 10
@@ -237,15 +241,35 @@ to gerar-novas-formigas
     print "Guarda-real nasceu!"
   ]
 
-  if num-guardas-reais = 3 and rei? = false [
-    ask turtles with [color = yellow] [
+  if num-guardas-reais >= 3 and rei? = false [
+    ask cod-rainha [
       print "A rainha está morta! Longa vida ao rei!"
       wait 1
       die
     ]
     criar-formigas-como "amarelo" 1
+    set cod-rei one-of turtles with [color = yellow]
     set rei? true
+
+    criar-rainha
   ]
+end
+
+to criar-rainha
+    let propriedades (propriedades-formiga "amarelo")
+
+  create-turtles 1 [
+    set classe "formiga"
+    set tipo item 0 propriedades
+    set vida item 1 propriedades
+    set dano item 2 propriedades
+    set color item 3 propriedades
+    set size 1
+    setxy random-xcor random-ycor
+  ]
+
+  set cod-rainha one-of turtles with [ color = yellow and self != cod-rei ]
+
 end
 
 to-report propriedades-formiga [formiga-cor]
@@ -256,7 +280,7 @@ to-report propriedades-formiga [formiga-cor]
     report ["movel" 120 10 magenta]
   ]
   if formiga-cor = "laranja" [
-    report ["movel" 200 20 orange]
+    report ["movel" 150 15 orange]
   ]
   if formiga-cor = "amarelo" [
     report ["imovel" 500 25 yellow]
@@ -300,6 +324,18 @@ to wiggle
   fd 1
 end
 
+to procurar-conjugue
+    let alvo one-of turtles in-radius 1 with [self = cod-rainha]
+    if alvo != nobody [
+      set random-x [xcor] of alvo
+      set random-y [ycor] of alvo
+
+      wait 1
+      set rei? false
+      print "O rei está morto! Longa vida à rainha!"
+      die
+    ]
+end
 
 ; === FUNÇÕES AUXILIARES ===
 
@@ -375,7 +411,7 @@ to-report propriedades-cacadores [tipo-cacador]
     report ["cacador-elite" 300 15 orange true]
   ]
   if tipo-cacador = "cacador-lendario" [
-    report ["cacador-lendario" 350 30 pink true]
+    report ["cacador-lendario" 750 30 pink true]
   ]
   report ["cacador-comum" 200 3 blue true]
 end
@@ -390,16 +426,19 @@ to verificar-alvos [classe-agente]
       ask alvo [
          set vida vida - [dano] of myself
         if vida <= 0 [
-            if color = yellow and rei? = true [
+            if color = orange [set num-guardas-reais num-guardas-reais - 1]
+            if self = cod-rei [
               print "O rei foi morto!"
               set rei? false
-              stop
+            ]
+            if self = cod-rainha [
+              print "A rainha foi morta!"
             ]
             ;print "Uma formiga foi eliminada!"
             die
           ]
         ]
-        set vida vida - 20
+        set vida vida - 50
       ]
     ]
 
@@ -441,7 +480,19 @@ to go
     recolor-patch                     ; atualiza a cor do patch após mudanças
   ]
   if rei? = true [
-    ask turtles with [ color = yellow ] [ wiggle ]
+    ask turtles with [ color = yellow ] [
+      wiggle
+    ]
+
+    ask cod-rei [ procurar-conjugue ]
+
+    if rei? = false [
+      ask patches [
+        set nest-scent 0
+        setup-ninho
+      ]
+      destacar-formigueiro
+    ]
   ]
   ask turtles with [classe = "cacador"] [
     verificar-alvos "cacador"
@@ -589,7 +640,18 @@ MONITOR
 119
 368
 real bugs
-count turtles  with [color = violet]
+count turtles  with [color = orange]
+17
+1
+11
+
+MONITOR
+112
+435
+230
+480
+NIL
+num-guardas-reais
 17
 1
 11

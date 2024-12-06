@@ -12,9 +12,11 @@ globals [
   ultimo-humanos-mortos
   ultimo-cacadores-mortos
   rei?
+  rainha?
   num-cacadores-lendarios
   cod-rei
   cod-rainha
+  encontrou?
 ]
 
 turtles-own [
@@ -51,9 +53,12 @@ to setup
   set num-cacadores-elite-mortos 0
   set num-guardas-reais 0
   set rei? false
+  set encontrou? false
+  set rainha? false
   set num-cacadores-lendarios 0
   set ultimo-humanos-mortos 0
   set ultimo-cacadores-mortos 0
+  set ultimo-guardas-reais 0
   criar-formigueiro
   destacar-formigueiro
   setup-patches
@@ -91,6 +96,7 @@ to criar-formigueiro
   ]
 
   set cod-rainha one-of turtles with [color = yellow]
+  set rainha? true
 
   ; Cria formigas vermelhas (soldados)
   criar-formigas-como "vermelho" 10
@@ -241,7 +247,7 @@ to gerar-novas-formigas
     print "Guarda-real nasceu!"
   ]
 
-  if num-guardas-reais >= 3 and rei? = false [
+  if num-guardas-reais > ultimo-guardas-reais and num-guardas-reais mod 3 = 0 and rei? = false [
     ask cod-rainha [
       print "A rainha está morta! Longa vida ao rei!"
       wait 1
@@ -252,6 +258,9 @@ to gerar-novas-formigas
     set rei? true
 
     criar-rainha
+    set rainha? true
+
+    set ultimo-guardas-reais num-guardas-reais
   ]
 end
 
@@ -332,6 +341,7 @@ to procurar-conjugue
 
       wait 1
       set rei? false
+      set encontrou? true
       print "O rei está morto! Longa vida à rainha!"
       die
     ]
@@ -433,12 +443,12 @@ to verificar-alvos [classe-agente]
             ]
             if self = cod-rainha [
               print "A rainha foi morta!"
+              set rainha? false
             ]
-            ;print "Uma formiga foi eliminada!"
             die
           ]
         ]
-        set vida vida - 50
+        set vida vida - 10
       ]
     ]
 
@@ -466,7 +476,7 @@ to go
   ask turtles with [classe = "formiga" and tipo = "movel"] [
     if who >= ticks [ stop ]             ; sincroniza a saída das formigas do ninho com o tempo
     verificar-alvos "formiga"
-    ifelse comida? = false [
+    ifelse comida? = false and rei? = false [
       procurar-por-comida                ; procura por comida se não estiver carregando
     ] [
       retornar-ao-formigueiro            ; retorna ao ninho se estiver carregando comida
@@ -486,13 +496,27 @@ to go
 
     ask cod-rei [ procurar-conjugue ]
 
-    if rei? = false [
+    if rei? = false and encontrou? = true [
       ask patches [
         set nest-scent 0
         setup-ninho
       ]
       destacar-formigueiro
     ]
+
+    if rei? = false and encontrou? = false [
+      print "Os caçadores mataram o rei! Fim da simulação."
+      user-message "Fim!"
+      stop
+    ]
+
+    if rainha? = false [
+      print "Os caçadores mataram a rainha! O rei não consegue mais procriar. Fim da simulação."
+      user-message "Fim!"
+      stop
+    ]
+
+    set encontrou? false
   ]
   ask turtles with [classe = "cacador"] [
     verificar-alvos "cacador"
@@ -501,6 +525,11 @@ to go
     fd 1
   ]
 
+  if rainha? = false and rei? = false [
+    print "As formigas não conseguem mais procriar! Fim da simulação."
+    user-message "Fim!"
+    stop
+  ]
   ;ações nivel observador
   gerar-novas-formigas
   criar-cacadores

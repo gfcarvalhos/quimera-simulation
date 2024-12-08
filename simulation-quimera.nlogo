@@ -17,6 +17,7 @@ globals [
   cod-rei
   cod-rainha
   encontrou?
+  evento-catastrofe?
 ]
 
 turtles-own [
@@ -59,6 +60,7 @@ to setup
   set ultimo-humanos-mortos 0
   set ultimo-cacadores-mortos 0
   set ultimo-guardas-reais 0
+  set evento-catastrofe? false
   criar-formigueiro
   destacar-formigueiro
   setup-patches
@@ -347,6 +349,42 @@ to procurar-conjuge
       die
     ]
 end
+
+; == Catástrofes (Tempestade) ===
+
+to tempestade
+  ; Dispersa formigas e reduz sua vida
+  ask turtles [
+    let original-x xcor
+    let original-y ycor
+    setxy random-xcor random-ycor  ; Move formigas aleatoriamente
+    if distancexy original-x original-y > 5 [
+      set vida max list (vida - 4) 0  ; Reduz vida se o movimento foi grande
+    ]
+    if vida = 0 [ die ]  ; Elimina formigas sem vida
+  ]
+  print "Uma tempestade dispersou as formigas e afetou o ambiente!"
+  
+  ; Remover fumaça e restaurar estado normal dos patches
+  ask patches [
+    recolor-patch  ; Chama o procedimento que atualiza a cor dos patches
+  ]
+  set evento-catastrofe? false  ; Marca o fim da tempestade
+end
+
+
+; === Vereficando Catástrofes
+
+to check-catastrophes
+  if not evento-catastrofe? [ ; Verifica se não há catástrofe em andamento
+    if random 200 < 1 [ ; 2% de chance de ocorrer uma catástrofe
+      set evento-catastrofe? true  ; Marca que uma tempestade começou
+      tempestade  ; Chama o evento tempestade
+    ]
+  ]
+end
+
+
 
 ; === FUNÇÕES AUXILIARES ===
 

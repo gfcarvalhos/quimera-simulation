@@ -18,7 +18,7 @@ globals [
   cod-rainha
   encontrou?
   evento-catastrofe?
-  contador-tempestades  
+  contador-tempestades
 ]
 
 turtles-own [
@@ -55,7 +55,7 @@ to setup
   set num-cacadores-elite-mortos 0
   set num-guardas-reais 0
   set rei? false
-  set encontrou? false
+  set encontrou? true
   set rainha? false
   set num-cacadores-lendarios 0
   set ultimo-humanos-mortos 0
@@ -291,15 +291,15 @@ to-report propriedades-formiga [formiga-cor]
 ;    report ["movel" 150 3 violet]
 ;  ]
   if formiga-cor = "rosa" [
-    report ["movel" 120 6 magenta]
+    report ["movel" 130 6 magenta]
   ]
   if formiga-cor = "laranja" [
-    report ["movel" 150 10 lime]
+    report ["movel" 160 10 lime]
   ]
   if formiga-cor = "amarelo" [
     report ["imovel" 500 25 yellow]
   ]
-  report ["movel" 100 3 red]
+  report ["movel" 110 3 red]
 end
 
 ; === MOVIMENTAÇÃO E ORIENTAÇÃO ===
@@ -360,12 +360,12 @@ to tempestade
     set vida max list (vida - 2) 0  ; Reduz a vida em 10, mas não abaixo de 0
     if vida = 0 [ die ]  ; Elimina formigas sem vida
   ]
-  
+
   print "Uma tempestade tirou vida das formigas!"
-  
+
   ; Incrementa o contador de tempestades
   set contador-tempestades contador-tempestades + 1
-  
+
   ; Marca o fim do evento
   set evento-catastrofe? false
 end
@@ -454,12 +454,12 @@ end
 
 to-report propriedades-cacadores [tipo-cacador]
   if tipo-cacador = "cacador-elite" [
-    report ["cacador-elite" 400 25 orange true]
+    report ["cacador-elite" 400 20 orange true]
   ]
   if tipo-cacador = "cacador-lendario" [
-    report ["cacador-lendario" 750 30 pink true]
+    report ["cacador-lendario" 750 25 pink true]
   ]
-  report ["cacador-comum" 300 20 blue true]
+  report ["cacador-comum" 300 15 blue true]
 end
 
 ; === DINÂMICA PARA INTERAÇÃO ===
@@ -474,11 +474,11 @@ to verificar-alvos [classe-agente]
         if vida <= 0 [
             if color = orange [set num-guardas-reais num-guardas-reais - 1]
             if self = cod-rei [
-              print "O rei foi morto!"
+              print "O rei foi morto pelos caçadores!"
               set rei? false
             ]
             if self = cod-rainha [
-              print "A rainha foi morta!"
+              print "A rainha foi morta pelos caçadores!"
               set rainha? false
             ]
             die
@@ -526,7 +526,16 @@ to go
     set chemical chemical * (100 - evaporation-rate) / 100  ; evaporação do feromônio
     recolor-patch                     ; atualiza a cor do patch após mudanças
   ]
+
+  ask turtles with [classe = "cacador"] [
+    verificar-alvos "cacador"
+
+    mover-cacadores
+    fd 1
+  ]
+
   if rei? = true [
+    set encontrou? false
     ask turtles with [ color = yellow ] [
       wiggle
     ]
@@ -541,29 +550,31 @@ to go
       destacar-formigueiro
     ]
 
-    if rei? = false and encontrou? = false [
-      print "Os caçadores mataram o rei! Fim da simulação."
-      user-message "Fim!"
-      stop
-    ]
-
     if rainha? = false [
-      print "Os caçadores mataram a rainha! O rei não consegue mais procriar. Fim da simulação."
+      print "O rei não consegue mais seguir com a linhagem. Fim da simulação."
       user-message "Fim!"
       stop
     ]
 
-    set encontrou? false
+    ;set encontrou? false
   ]
-  ask turtles with [classe = "cacador"] [
-    verificar-alvos "cacador"
 
-    mover-cacadores
-    fd 1
+  if rainha? = true and rei? = false and encontrou? = false [
+    print "A rainha não consegue mais seguir com a linhagem. Fim da simulação."
+    user-message "Fim!"
+    stop
   ]
 
   if rainha? = false and rei? = false [
     print "As formigas não conseguem mais procriar! Fim da simulação."
+    user-message "Fim!"
+    stop
+  ]
+
+  ;Verifica população de formigas
+  let populacao-formiga count turtles  with [classe = "formiga" and color != yellow]
+  if populacao-formiga = 0 [
+    print "População de Formigas Erradicada. Fim da simulação."
     user-message "Fim!"
     stop
   ]

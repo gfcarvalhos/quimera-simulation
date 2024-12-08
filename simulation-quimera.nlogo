@@ -177,6 +177,7 @@ to recolor-patch  ; procedimento dos patches
     ] [
       ; patches normais variam de cor com base na quantidade de feromônio
       set pcolor scale-color pink chemical 0.1 5
+      ;set pcolor lime + 3
     ]
     if aldeoes > 0 [
       set pcolor lime
@@ -286,15 +287,15 @@ to-report propriedades-formiga [formiga-cor]
 ;    report ["movel" 150 3 violet]
 ;  ]
   if formiga-cor = "rosa" [
-    report ["movel" 120 10 magenta]
+    report ["movel" 120 6 magenta]
   ]
   if formiga-cor = "laranja" [
-    report ["movel" 150 15 orange]
+    report ["movel" 150 10 lime]
   ]
   if formiga-cor = "amarelo" [
     report ["imovel" 500 25 yellow]
   ]
-  report ["movel" 100 5 red]
+  report ["movel" 100 3 red]
 end
 
 ; === MOVIMENTAÇÃO E ORIENTAÇÃO ===
@@ -333,7 +334,7 @@ to wiggle
   fd 1
 end
 
-to procurar-conjugue
+to procurar-conjuge
     let alvo one-of turtles in-radius 1 with [self = cod-rainha]
     if alvo != nobody [
       set random-x [xcor] of alvo
@@ -418,12 +419,12 @@ end
 
 to-report propriedades-cacadores [tipo-cacador]
   if tipo-cacador = "cacador-elite" [
-    report ["cacador-elite" 300 15 orange true]
+    report ["cacador-elite" 400 25 orange true]
   ]
   if tipo-cacador = "cacador-lendario" [
     report ["cacador-lendario" 750 30 pink true]
   ]
-  report ["cacador-comum" 200 3 blue true]
+  report ["cacador-comum" 300 20 blue true]
 end
 
 ; === DINÂMICA PARA INTERAÇÃO ===
@@ -448,7 +449,7 @@ to verificar-alvos [classe-agente]
             die
           ]
         ]
-        set vida vida - 10
+        ;set vida vida - 10
       ]
     ]
 
@@ -464,7 +465,7 @@ to verificar-alvos [classe-agente]
             die
           ]
         ]
-        set vida vida - 10
+        set vida vida - 20
       ]
     ]
   ]
@@ -494,7 +495,7 @@ to go
       wiggle
     ]
 
-    ask cod-rei [ procurar-conjugue ]
+    ask cod-rei [ procurar-conjuge ]
 
     if rei? = false and encontrou? = true [
       ask patches [
@@ -530,6 +531,7 @@ to go
     user-message "Fim!"
     stop
   ]
+
   ;ações nivel observador
   gerar-novas-formigas
   criar-cacadores
@@ -669,7 +671,7 @@ MONITOR
 119
 368
 real bugs
-count turtles  with [color = orange]
+count turtles  with [color = lime]
 17
 1
 11

@@ -17,6 +17,8 @@ globals [
   cod-rei
   cod-rainha
   encontrou?
+  evento-catastrofe?
+  contador-tempestades  
 ]
 
 turtles-own [
@@ -59,6 +61,8 @@ to setup
   set ultimo-humanos-mortos 0
   set ultimo-cacadores-mortos 0
   set ultimo-guardas-reais 0
+  set evento-catastrofe? false
+   set contador-tempestades 0
   criar-formigueiro
   destacar-formigueiro
   setup-patches
@@ -348,6 +352,37 @@ to procurar-conjuge
     ]
 end
 
+; == Catástrofes (Tempestade) ===
+
+to tempestade
+; Reduz vida das formigas
+  ask turtles with [classe = "formiga"] [
+    set vida max list (vida - 2) 0  ; Reduz a vida em 10, mas não abaixo de 0
+    if vida = 0 [ die ]  ; Elimina formigas sem vida
+  ]
+  
+  print "Uma tempestade tirou vida das formigas!"
+  
+  ; Incrementa o contador de tempestades
+  set contador-tempestades contador-tempestades + 1
+  
+  ; Marca o fim do evento
+  set evento-catastrofe? false
+end
+
+
+; === Vereficando Catástrofes
+
+to check-catastrophes
+  if contador-tempestades < 1 [  ; Limita a tempestade a no máximo 2 ocorrências
+    if random 300 < 10 [ ; 10% de chance de ocorrer uma tempestade
+      tempestade
+    ]
+  ]
+end
+
+
+
 ; === FUNÇÕES AUXILIARES ===
 
 to-report nest-scent-at-angle [angle]
@@ -474,6 +509,7 @@ end
 ; === PROCEDIMENTOS PRINCIPAIS ===
 
 to go
+  check-catastrophes  ; Verifica se ocorre uma tempestade no início do tick
   ask turtles with [classe = "formiga" and tipo = "movel"] [
     if who >= ticks [ stop ]             ; sincroniza a saída das formigas do ninho com o tempo
     verificar-alvos "formiga"

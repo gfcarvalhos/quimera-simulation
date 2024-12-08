@@ -357,7 +357,7 @@ end
 to tempestade
 ; Reduz vida das formigas
   ask turtles with [classe = "formiga"] [
-    set vida max list (vida - 10) 0  ; Reduz a vida em 10, mas não abaixo de 0
+    set vida max list (vida - 2) 0  ; Reduz a vida em 10, mas não abaixo de 0
     if vida = 0 [ die ]  ; Elimina formigas sem vida
   ]
   

@@ -4,6 +4,10 @@ Este repositório contém o código e a documentação para o projeto **Simulaç
 
 ---
 
+## 🎥 Vídeo de Apresentação
+
+[Youtube: Clique aqui](https://youtu.be/u3gbNbh9V3o)
+
 ## 🐜 **Descrição do Projeto**
 
 ### **O Formigueiro**
@@ -51,10 +55,16 @@ Este repositório contém o código e a documentação para o projeto **Simulaç
 
 ## 🚀 **Como Rodar o Projeto**
 
+I - Opção 1:
+
 1. Baixe e instale o **NetLogo**.
 2. Clone este repositório.
 3. Abra o arquivo `.nlogo` no NetLogo.
 4. Execute a simulação e observe a evolução do formigueiro e as interações com o ambiente.
+
+II - Opção 2:
+
+1. Acesso site do netlogo e gere um novo arquivo: [Netlogo](https://www.netlogoweb.org/launch#NewModel)
 
 ---
 

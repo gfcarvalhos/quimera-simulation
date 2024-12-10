@@ -39,6 +39,10 @@ Este repositório contém o código e a documentação para o projeto **Simulaç
 - Surgem aleatoriamente no mapa e contêm humanos, que são fonte de alimento para a rainha.
 - Após atingir um limite de humanos consumidos, caçadores começam a aparecer.
 
+### **Catástrofes**
+
+-- Inicia uma tempestade no inicio da simulação que retira vida das formigas e reposiciona elas.
+
 ### **Desafio Final**
 
 - Se um **caçador lendário** encontrar o **rei**, surge a **Rosa dos Pobres**, um evento que extermina todas as quimeras.

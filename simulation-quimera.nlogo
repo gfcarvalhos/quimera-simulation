@@ -207,6 +207,7 @@ to criar-formigas-como [formiga-cor quantidade]
   ]
 end
 
+
 to procurar-por-comida
   if comida > 0 [
     set comida comida - 1
@@ -245,13 +246,15 @@ to gerar-novas-formigas
   if num-humanos-mortos > 0 and num-humanos-mortos mod 10 = 0 and rei? = false [
     criar-formigas-como "rosa" 1
   ]
-
+  if num-cacadores-comum-mortos > 0 and num-cacadores-comum-mortos mod 10 = 0 and rei? = false [
+    criar-formigas-como "fucsia" 1
+    print "General nasceu!"
+  ]
   if num-cacadores-elite-mortos > 0 and num-cacadores-elite-mortos mod 5 = 0 and num-guardas-reais < 3 and rei? = false [
     criar-formigas-como "laranja" 1
     set num-guardas-reais num-guardas-reais + 1
     print "Guarda-real nasceu!"
   ]
-
   if num-guardas-reais > ultimo-guardas-reais and num-guardas-reais mod 3 = 0 and rei? = false [
     ask cod-rainha [
       print "A rainha está morta! Longa vida ao rei!"
@@ -268,6 +271,7 @@ to gerar-novas-formigas
     set ultimo-guardas-reais num-guardas-reais
   ]
 end
+
 
 to criar-rainha
     let propriedades (propriedades-formiga "amarelo")
@@ -287,9 +291,6 @@ to criar-rainha
 end
 
 to-report propriedades-formiga [formiga-cor]
-;  if formiga-cor = "lilas" [
-;    report ["movel" 150 3 violet]
-;  ]
   if formiga-cor = "rosa" [
     report ["movel" 130 6 magenta]
   ]
@@ -299,8 +300,12 @@ to-report propriedades-formiga [formiga-cor]
   if formiga-cor = "amarelo" [
     report ["imovel" 500 25 yellow]
   ]
-  report ["movel" 110 3 red]
+  if formiga-cor = "fucsia" [
+    report ["movel" 200 20 pink]
+  ]
+  report ["movel" 100 5 red]
 end
+
 
 ; === MOVIMENTAÇÃO E ORIENTAÇÃO ===
 
@@ -476,18 +481,30 @@ end
 
 ; === DINÂMICA PARA INTERAÇÃO ===
 
+to exterminar-formigas
+  ask turtles with [classe = "formiga"] [
+    die
+  ]
+  print "Todas as formigas foram exterminadas pela Rosa dos Pobres!"
+  user-message "Fim da Simulação: Rosa dos Pobres ativada!"
+  stop
+end
+
+
 to verificar-alvos [classe-agente]
   ask turtles with [classe = classe-agente] [
     if classe = "cacador" [
-    let alvo one-of turtles in-radius 1 with [classe = "formiga"]
-    if alvo != nobody [
-      ask alvo [
-         set vida vida - [dano] of myself
-        if vida <= 0 [
+      let alvo one-of turtles in-radius 1 with [classe = "formiga"]
+      if alvo != nobody [
+        ask alvo [
+          set vida vida - [dano] of myself
+          if vida <= 0 [
             if color = orange [set num-guardas-reais num-guardas-reais - 1]
             if self = cod-rei [
-              print "O rei foi morto pelos caçadores!"
+              print "O rei foi morto! A Rosa dos Pobres exterminará todas as formigas!"
               set rei? false
+              exterminar-formigas
+              stop
             ]
             if self = cod-rainha [
               print "A rainha foi morta pelos caçadores!"
@@ -499,16 +516,15 @@ to verificar-alvos [classe-agente]
         ;set vida vida - 10
       ]
     ]
-
     if classe = "formiga" [
       let alvo one-of turtles in-radius 1 with [classe = "cacador"]
       if alvo != nobody [
         ask alvo [
-         set vida vida - [dano] of myself
-         if vida <= 0 [
+          set vida vida - [dano] of myself
+          if vida <= 0 [
             if tipo = "cacador-comum" [set num-cacadores-comum-mortos num-cacadores-comum-mortos + 1]
             if tipo = "cacador-elite" [set num-cacadores-elite-mortos num-cacadores-elite-mortos + 1]
-           ; print "Um caçador foi eliminado!"
+            if tipo = "cacador-lendario" [set num-cacadores-lendarios num-cacadores-lendarios - 1]
             die
           ]
         ]
@@ -517,6 +533,8 @@ to verificar-alvos [classe-agente]
     ]
   ]
 end
+
+
 
 ; === PROCEDIMENTOS PRINCIPAIS ===
 
@@ -562,6 +580,14 @@ to go
       destacar-formigueiro
     ]
 
+    if rei? = false or not any? turtles with [self = cod-rei] and encontrou? = false [
+      print "Os caçadores mataram o rei! Fim da simulação."
+      print "O rei foi morto! Ativando Rosa dos Pobres."
+      exterminar-formigas
+      user-message "Fim!"
+      stop
+    ]
+
     if rainha? = false [
       print "O rei não consegue mais seguir com a linhagem. Fim da simulação."
       user-message "Fim!"
@@ -582,6 +608,10 @@ to go
     user-message "Fim!"
     stop
   ]
+  if random 80 < 10 [
+    tempestade
+  ]
+
 
   ;Verifica população de formigas
   let populacao-formiga count turtles  with [classe = "formiga" and color != yellow]
@@ -598,10 +628,10 @@ to go
 end
 @#$#@#$#@
 GRAPHICS-WINDOW
-278
-15
-745
-483
+242
+17
+709
+485
 -1
 -1
 13.91
@@ -692,10 +722,10 @@ count turtles  with [color = magenta]
 11
 
 MONITOR
-148
-205
-253
-250
+139
+207
+244
+252
 normal hunter
 count turtles  with [tipo = \"cacador-comum\"]
 17
@@ -736,12 +766,23 @@ count turtles  with [color = lime]
 11
 
 MONITOR
-112
-435
-230
-480
+80
+394
+198
+439
 NIL
 num-guardas-reais
+17
+1
+11
+
+MONITOR
+143
+149
+237
+194
+general bugs
+count turtles with [dano = 20]
 17
 1
 11

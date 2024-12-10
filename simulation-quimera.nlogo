@@ -360,17 +360,38 @@ end
 ; == Catástrofes (Tempestade) ===
 
 to tempestade
-  ; Verifica se ainda pode ocorrer uma tempestade
+  ; Verifica se podo ocorrer uma nova tempestade
   if contador-tempestades >= 2 [
     stop ; Impede que a tempestade ocorra mais de 2 vezes
   ]
+  ; Incrementa o contador de tempestades
+  set contador-tempestades contador-tempestades + 1
+  print "A tempestade começou! Nuvens e raios estão no céu."
+  ; Reduz vida das formigas
+  ask turtles with [classe = "formiga"] [
+    set vida max list (vida - 2) 0  ; Reduz a vida em 10, mas não abaixo de 0
+    if vida = 0 [ die ]  ; Elimina formigas sem vida
+  ]
+  print "Uma tempestade tirou vida das formigas!"
+  ; A tempestade dura 5 segundos (50 ciclos de 5s)
+  repeat 50 [
+    ask patches[
+      set pcolor gray
+    ]
+    display ; Atualiza a interface para mostrar os efeitos
+    wait 3 ; Aguarda 3.0 segundo antes do próximo ciclo
+  ]
+  display ; Atualiza a interface novamente
+  print "A tempestade acabou. O céu está limpo novamente."
+  ; Marca o fim do evento
+  set evento-catastrofe? false
 end
 
 
 ; === Vereficando Catástrofes
 
 to check-catastrophes
-   if contador-tempestades < 1 [  ; Limita a tempestade a no máximo 2 ocorrências
+  if contador-tempestades < 1 [  ; Limita a tempestade a no máximo 2 ocorrências
     if random 100 < 10 [ ; 10% de chance de ocorrer uma tempestade
       tempestade
     ]

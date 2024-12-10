@@ -70,3 +70,4 @@ Este repositório contém o código e a documentação para o projeto **Simulaç
 
 Disciplina: **Inteligência Artificial**  
 Aluno: Gabriel Felipe Carvalho Silva
+Aluno: Judson Rodrigues Ciribelli

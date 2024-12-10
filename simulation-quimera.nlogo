@@ -364,7 +364,7 @@ to tempestade
   if contador-tempestades >= 2 [
     stop ; Impede que a tempestade ocorra mais de 2 vezes
   ]
-
+end
 
 
 ; === Vereficando Catástrofes

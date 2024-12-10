@@ -7,6 +7,7 @@ Este repositório contém o código e a documentação para o projeto **Simulaç
 ## 🐜 **Descrição do Projeto**
 
 ### **O Formigueiro**
+
 - **Formação Inicial**: O formigueiro surge em um ponto aleatório do mapa, com uma área delimitada.
 - **Rainha Quimera**: Uma rainha mutante que consome qualquer ser vivo para adquirir novos genes para prole.
 - **Hierarquia das Formigas**:
@@ -17,6 +18,7 @@ Este repositório contém o código e a documentação para o projeto **Simulaç
   - **Rei e Rainha**: Amarelo Ouro (#FFC300) - Os mais fortes da colônia.
 
 ### **Ciclo de Vida e Evolução**
+
 1. A rainha se alimenta de fontes básicas, gerando formigas vermelhas.
 2. Ao invadir aldeias humanas e consumir humanos, a rainha gera **formigas capitãs**.
 3. Ao consumir caçadores comuns, a rainha gera **formigas generais**;
@@ -25,6 +27,7 @@ Este repositório contém o código e a documentação para o projeto **Simulaç
 6. O rei precisa encontrar uma nova rainha para criar um novo formigueiro e continuar a espécie.
 
 ### **Os Caçadores**
+
 - **Caçadores Comuns**: Azul Royal (#4169E1) - Vida básica.
 - **Caçadores de Elite**: Verde Esmeralda (#2ECC71) - Vida muito elevada.
 - **Caçadores Lendários**: Turquesa Neon (#40E0D0) - Vida extremamente alta.
@@ -32,15 +35,22 @@ Este repositório contém o código e a documentação para o projeto **Simulaç
 À medida que a colônia cresce e ameaça aldeias, caçadores aparecem com força crescente. A dinâmica entre formigas e caçadores é definida por níveis de força, onde apenas formigas mais fortes enfrentam caçadores de igual ou inferior nível.
 
 ### **Aldeias**
+
 - Surgem aleatoriamente no mapa e contêm humanos, que são fonte de alimento para a rainha.
 - Após atingir um limite de humanos consumidos, caçadores começam a aparecer.
 
+### **Catástrofes**
+
+-- Inicia uma tempestade no inicio da simulação que retira vida das formigas e reposiciona elas.
+
 ### **Desafio Final**
+
 - Se um **caçador lendário** encontrar o **rei**, surge a **Rosa dos Pobres**, um evento que extermina todas as quimeras.
 
 ---
 
 ## 🚀 **Como Rodar o Projeto**
+
 1. Baixe e instale o **NetLogo**.
 2. Clone este repositório.
 3. Abra o arquivo `.nlogo` no NetLogo.
@@ -49,6 +59,7 @@ Este repositório contém o código e a documentação para o projeto **Simulaç
 ---
 
 ## 📚 **Conceitos Aplicados**
+
 - **Modelagem Baseada em Agentes (ABM)**: Simulação de comportamentos individuais para observar fenômenos emergentes.
 - **Inteligência Artificial**: Implementação de decisões estratégicas por parte dos agentes.
 - **Evolução e Adaptação**: Comportamentos e características dos agentes se ajustam ao ambiente dinâmico.
@@ -56,6 +67,6 @@ Este repositório contém o código e a documentação para o projeto **Simulaç
 ---
 
 ## 🏛 **Universidade Federal do Maranhão (UFMA)**
+
 Disciplina: **Inteligência Artificial**  
 Aluno: Gabriel Felipe Carvalho Silva
-

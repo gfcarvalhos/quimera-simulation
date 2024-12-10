@@ -360,27 +360,18 @@ end
 ; == Catástrofes (Tempestade) ===
 
 to tempestade
-; Reduz vida das formigas
-  ask turtles with [classe = "formiga"] [
-    set vida max list (vida - 2) 0  ; Reduz a vida em 10, mas não abaixo de 0
-    if vida = 0 [ die ]  ; Elimina formigas sem vida
+  ; Verifica se ainda pode ocorrer uma tempestade
+  if contador-tempestades >= 2 [
+    stop ; Impede que a tempestade ocorra mais de 2 vezes
   ]
 
-  print "Uma tempestade tirou vida das formigas!"
-
-  ; Incrementa o contador de tempestades
-  set contador-tempestades contador-tempestades + 1
-
-  ; Marca o fim do evento
-  set evento-catastrofe? false
-end
 
 
 ; === Vereficando Catástrofes
 
 to check-catastrophes
-  if contador-tempestades < 1 [  ; Limita a tempestade a no máximo 2 ocorrências
-    if random 300 < 10 [ ; 10% de chance de ocorrer uma tempestade
+   if contador-tempestades < 1 [  ; Limita a tempestade a no máximo 2 ocorrências
+    if random 100 < 10 [ ; 10% de chance de ocorrer uma tempestade
       tempestade
     ]
   ]
@@ -596,6 +587,10 @@ to go
     user-message "Fim!"
     stop
   ]
+  if random 80 < 10 [
+    tempestade
+  ]
+
 
   ;Verifica população de formigas
   let populacao-formiga count turtles  with [classe = "formiga" and color != yellow]

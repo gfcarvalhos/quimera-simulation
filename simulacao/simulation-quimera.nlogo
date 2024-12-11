@@ -374,12 +374,12 @@ to tempestade
   ]
   print "Uma tempestade tirou vida das formigas!"
   ; A tempestade dura 5 segundos (50 ciclos de 5s)
-  repeat 50 [
+  repeat 4 [
     ask patches[
       set pcolor gray
     ]
     display ; Atualiza a interface para mostrar os efeitos
-    wait 3 ; Aguarda 3.0 segundo antes do próximo ciclo
+    ;wait 3 ; Aguarda 3.0 segundo antes do próximo ciclo
   ]
   display ; Atualiza a interface novamente
   print "A tempestade acabou. O céu está limpo novamente."
